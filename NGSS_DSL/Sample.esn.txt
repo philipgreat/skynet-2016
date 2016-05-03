@@ -1,0 +1,174 @@
+// 注释采用Java格式的注释
+// 双斜线的单行注释
+// /*...*/的多行注释
+
+// 第一个有效行，必须是layer。 layer的名字可以有点。
+// 被点分开的每个部分必须是一个有效的标识符。标识符的规则和java相同，但是不可以使用$. $用于保留标识符。
+layer this.is.a.sample.layer
+
+// 可以引用另外的层。 关键字是import
+// 和Javal类似，import 出现在 层 声明和真正的语义网定义之间。 这个主要是为了解析方便。
+import another.layer
+// 需要的关系，必须定义。关系也有‘层’，引入关系的关键字是‘use’
+use some.relationships.layer
+
+/**
+ * 一个语义网的层内，可以有多个实体。 每个实体的定义规则是 <实体标识符> {<内容>}
+ * 实体定义的内容主要包括两大类：关系和约束
+ * 关系的格式为 <关系名> <角色1>,<角色2>...
+ * 约束的格式为 <约束表达式>
+ */
+AnEntitySample {	// 实体名字使用Camel格式。 “层名:名字”将是一个实体定义的全局唯一索引
+	// 关键字 displayedAs 用于I18N。
+	// 后面的参数依次是英文和中文。默认只有这两个值。这些值会被抽成I18N的字典内容
+	displayedAs	"Entity 1","实体1"
+
+	/* 对于简单的双方关系，例如 A contains B, 可以连写在一行上。
+	*  例如 A contains B,C,D
+	* 这个不会造成歧义
+	*/
+	MustContainsOne AnExampleOfMemberEntity, AnotherMemberEntity
+	/* MustContainsOne 是一个关系，它的定义，需要根据关系的层来查找
+	*  首先查找 some.relationships.layer.MustContainsOne 即当前use的层
+	*  再找 system.relationship.layer.MustContainsOne 即系统缺省的层
+	*  再找 some.relationships.imported.by.some.relationships.layer.MustContainsOne 即被当前use的层所引用的层
+	*  再找 any.relationships.layer.MustContainsOne 即系统可以找到的任何其他层
+	*/
+	
+	/* 对于有多个角色关系，例如 A SecureAuthenticatedBy B,C 一次只能写一个，不能连写。
+	*  一来看起来清晰，假如写 A R B,C,D,E,F,G 或者 A R (B,C),(D,E), (F,G) 都不美观
+	*  二来方便解析. 不需要分割，还可以支持缺省值（TBD）
+	*  关系行尾的分号可写可不写（建议不写，TBD）
+	*  所以解析关系时，必须先知道关系是双方关系还是多方关系，才知道如何解析后面的实体列表
+	*/
+	SecureAuthenticatedBy UserName, UserPassword;
+	/* UserName 和 UserPassword 也需要一个查找定义的过程。
+	*  首先查找 this.is.a.sample.layer.UserName 即本层
+	*  再找 system.entities.layer.UserName 即系统缺省的层
+	*  再找 another.layer.UserName 即当前引用的层
+	*  再找 the.layer.imported.by.another.layer.UserName 即所有被间接引用的层
+	*  再找 any.layer.UserName 即任何可以找到的层
+	*/
+	
+	some.special.layer:AnotherRelationshipWith some.speical.layer:SomeEntity
+	/* 也可以直接使用层名指定关系和实体。
+	*  层名和实体/关系标识符的分割符号是冒号
+	*/
+}
+
+/**
+ * 这个例子是一个 ‘单实体’， 即在系统中是一个基本单位，不是组合实体。
+ */
+SecondEntity {
+	displayedAs	"Entity 2","实体2"
+	
+	// 任何单实体都必须（直接或间接）继承自系统自定义几个边缘实体。
+	// 系统预定义了：String, Number, Time, Enum, Boolean，Currency
+	// 关键字是prototype. 例如
+	// prototype Currency
+	// 单实体可以预置缺省值，写法是一个构造函数
+	prototype Currency("RMB",0)
+	/* 这里涉及到一个‘立即值’和‘变量值’的表达问题。
+	 * 原则上和Java一致：除预定义常量外，有引号的是立即值，没引号的变量
+	 * 预定义的常量有：
+	 * 		Boolean： true, false 		全小写
+	 *		Number:   符合[-][\d]+[\.][\d]*或者0[xX][A-Fa-f\d]+的。 即只支持正负十进制整/浮点数和16进制无符号数
+	 *		Time:	$now：即当前时间	
+	 *				$rightNow：即编译时的时间。 注意$是保留字的标志
+	 *				形如"2016-05-03 23:59:59" 这样的时间字符串
+	 */
+}
+
+/**
+ * 这个例子是一个‘Enum’
+ */
+ThirdEntity {
+	prototype Enum
+	displayedAs	"Family Relation","家庭关系"
+	
+	// 定义Enum值的关键字是 valueMayBe
+	// 参数是 先英文，后中文，要用引号括起，因为它们实际上是字符串常量而已
+	valueMayBe "Father","爹"
+	valueMayBe "Mother","娘"
+	valueMayBe "Brother","兄弟"
+	valueMayBe "Sister","姐妹"
+}
+
+/**
+ * 这个例子是一个简单的单体约束
+ */
+FourthEntity {
+	prototype Number(0)
+	displayedAs	"Age","年龄"
+	
+	// 关键字 constraints {...} 表示其中内容为约束
+	constraints {
+		range [0,200]	// 表示正确的取值范围是 0<=FourthEntity<=200. 
+		/* range 是约束关键字。 可用的单实体约束类型目前全部是系统预定义的，不支持自定义约束规则。
+		 * 单实体约束表达式的目标对象就是自己，所以写法简单，就是<约束关键字> <参数>而已。
+		 * 目前支持的约束有：
+		 * range <范围表达式>：表示数字的取值范围，或者字符串的长度范围，或者日期的范围
+		 * 		范围表达式使用开闭区间规则，例如(0.1, 99.9) [0,100.0)
+		 * 		max，min这样的约束还是用range标志，例如(0,OO)表示大于零，OO 表示正无穷大，-OO表示负无穷大。 
+		 *		当range是时间范围时，时间常量还是需要引号，例如2000年以后表示为["2000-01-01 00:00:00+8:00",OO]
+		 * is_integer：表示数字必须是整型数。无参数
+		 * pattern <正则表达式>：表示字符串必须满足该正则表达式 例如 pattern [\d\w]+?>\s 只有一个参数，没有引号或者/../包围，语法按Java
+		 * atleast <下限>：表示集合至少要有几个元素。atleast 1 表示不为空的集合
+		 * atmost <上限>：表示集合最多有几个元素。 atmost 0 表示为空的集合
+		 */
+		 
+		is_integer	// 必须是整数。 integer 约束没有参数
+	}
+}
+
+/**
+ * 这个例子是一个符合实体约束的例子
+ */
+FifthEntity {
+	displayedAs	"axman","樵夫"
+	
+	MayContainsOne 姓名，年龄，老母亲
+	EarnMoneyBy 砍柴职业
+	
+	MayContainsOne 金斧子
+	MayContainsOne 银斧子
+	MayContainsOne 铁斧子
+	/* 规则是：至少要有一个斧子，最多可以有3个全部
+	 * 这个规则可以建立一个新的关系,叫做‘诚实的樵夫’，然后把约束写到新的关系里去。这里先不考虑这个方案。
+	 * 因为这个约束是多个关系同时和axman发生关系时产生的，所以需要写到实体的约束里去。
+	 * 要解决的问题是如何指明约束的对象，因为复合实体内有多个成员关系。
+	 * 以下待定，需要大家讨论：
+	 */
+	constraints {	// 注意，这里的所有约束都是指实体有效性约束。假设樵夫没有斧子，就不是樵夫。
+		// 表示法1：
+		range [1,3] of {MayContainsOne 金斧子, MayContainsOne 银斧子, MayContainsOne 铁斧子}
+		// 这个表示：这3个contains关系，至少1个成立，最多3个都成立
+		
+		// 表示法2：
+		atleast 1 of {金斧子, 银斧子, 铁斧子}
+		atmost 3 of {金斧子, 银斧子, 铁斧子}
+		// 这个表示3个斧子至少有1个存在，最多3个。 因为他们只出现在一个关系里，所以它们存在等价于它们所涉及的关系成立
+		// 假设金斧子出现在不止一个关系中，那么这个简写方式就无法表达清楚了
+		
+		// 表示法3：
+		(MayContainsOne 金斧子) or (MayContainsOne 银斧子) or (MayContainsOne 铁斧子)
+		// 这个表示3个关系任意一个成立即可。 因为我们说的刚刚好是最大3，所以表达式比较简单，假设我们说最多2个，这个表达式会很长
+		
+		// 表示法4：首先用def 关键字把关系实例指代出来，然后后面再定义关系间的约束，力图
+		// def 金 = MayContainsOne 金斧子
+		// def 银 = MayContainsOne 银斧子
+		// def 铁 = MayContainsOne 铁斧子
+		atleast 1 of {金, 银, 铁}
+		atmost 3 of {金, 银, 铁}
+		// 或者
+		(金 or 银 or 铁)	// 假设约束是最多两个的话就是 ((金 and 银) or (银 and 铁) or (铁 and 金))
+	}
+	/* 关系间的约束会很复杂，有这么几大类：
+	*	1. 关系成立的互斥约束。 有的关系成立了，那么某个其他关系就不能成立这种
+	*   2. 关系成立的依赖约束。 某个关系必须和另外某个关系同时成立（记住依然是关于实体有效性的约束，不是业务约束)
+	*	3. 数量平衡关系。某个关系成立多少份，其他关系可以成立的份数不能超过多少。 例如一个8通道集成器，8个口都可以同时
+	*		做输入或者输出口，但是3个定义为输出，最多只有5个可以被定义为输入。
+	*  所以大多数情况，还是新建关系，然后把约束放到关系里。 不过是不是能解决问题？不知道，目前只是把实体的约束问题推到实体的关系里而已，
+	*  没有拆分问题，也没有引入新的信息，可以认为f(a,b,c)解不开，就写了一个 f(a,b,c)=g(a,b,c)一样。等我过两天把关系定义的语法整理出来再看。
+	*/
+}
