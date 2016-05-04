@@ -1,7 +1,34 @@
 关系定义有如下目标
-1. 定义行为之间的交互
+0. 定义角色之间的交互
+1. 定义行为之间的交互，行为可以包含行为
 2. 定义行为交互的条件
 3. 为行为命名
 4. 为条件和事件命名
+5. 实现封装
 
 
+
+order和announce的关系
+
+relation X extends Y,Z,E{
+	
+	if(true) announce{
+		connect(){//默认fromto, 成功之后的announced状态是可以推导出来的
+       if(error()) {//这个错一定是系统的错
+       }
+    }
+  }
+
+
+}
+
+order和orderTaken的关系
+relation X extends Y,Z,E{
+	if(announced()) take{
+		connect(){
+       if(error()) {
+       }
+    }
+  }
+
+}
