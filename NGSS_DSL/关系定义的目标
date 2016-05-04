@@ -14,21 +14,53 @@ relation AnnouncedBy extends Y,Z,E{
 	
 	if(true) announce{
 		connect(){//默认fromto, 成功之后的announced状态是可以推导出来的, 见后面一个关系对announced的说明
-       if(error()) {//这个错一定是系统的错
-       }
-    }
-  }
-
-
+			if(error()) {//这个错一定是系统的错
+			}
+		}
+	}
 }
 
 order和orderTaken的关系
 relation TakenBy extends Y,Z,E{
 	if(announced(contains(Annoucement)) take{
 		connect(){
-       if(error()) {
-       }
-    }
-  }
+			if(error()) {
+			}
+		}
+	}
 
 }
+
+
+--------------------
+问题：
+对第一段的解读见注释
+relation AnnouncedBy extends Y,Z,E{
+	// 问题1：AnnouncedBy 是关系的名字。 层的问题先不考虑。这个名字是在语义网中引用的标识，还是用下面的 announce？
+	// 问题2：我推测 extends 是 prototype的意思，对不？
+	// 问题3：Y,Z,E是另外有定义的3个关系，对不？ 
+	// 问题4：这个关系有两个缺省的角色 $from, $to， 对不？
+	// 问题5：extends Y 意味着 Y 关系也有和本关系相同的角色（即$from, $to)，并且这里的$from除了下面定义的 announce 行为，还有Y,Z,E定义给$from的行为
+	
+	if(true) announce{
+	// 问题6：这里的announce是行为名称吗？意思是将来会生成一个 Order::announce(Announcement) 的接口
+	// 问题7：这个行为没有说明是$from的，还是$to的，所以推测是：如果某个关系中，只有$from有行为，那么就不需要说明行为是谁的，默认都是$from的。对不？
+	// 问题8：如果$to有某些行为需要定义，则需要申明这个行为是谁的么？
+	// 问题9：每个关系都至少可能有connect，disconnect行为。 如果只有一个行为，那么就是这个关系connect的行为，并且没有disconnect行为。对不？
+	
+		connect(){//默认fromto, 成功之后的announced状态是可以推导出来的, 见后面一个关系对announced的说明
+		// 问题10：设想announce被使用的场景：在实体Order的定义中有 
+		//			Order { ...
+		//				AnnouncedBy Annoucement (是Annoucement吧？)
+		//			...} 是这么用么?
+		// 问题11： connect的具体行为是如何确定的？ 这里表明的意思是说：AnnouncedBy的announce行为是connect $from,$to
+		//			而前面的定义说 AnnouncedBy 的 connect行为就是 announce。 所以变成了 A AnnouncedBy B 的connect 的定义为 connect A,B
+		//			那么问题来了：我来看AnnouncedBy的定义文件，希望看到 connect 这个关系时，$from和$to分别做什么事情；
+		//			看进去，看到了它的定义是“connect $from,$to"
+		//			这样不是等于什么都没说么？还是说这里还没写具体的操作？或者说这里的connect就是 A.setB(B)的意思 ?
+			if(error()) {//这个错一定是系统的错
+			}
+		}
+	}
+}
+先写这些问题。需要理解你背后的思路，才好继续。
