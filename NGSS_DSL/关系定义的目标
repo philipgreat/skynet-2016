@@ -10,7 +10,7 @@
 
 order和announce的关系
 
-relation X extends Y,Z,E{
+relation AnnouncedBy extends Y,Z,E{
 	
 	if(true) announce{
 		connect(){//默认fromto, 成功之后的announced状态是可以推导出来的, 见后面一个关系对announced的说明
@@ -23,7 +23,7 @@ relation X extends Y,Z,E{
 }
 
 order和orderTaken的关系
-relation X extends Y,Z,E{
+relation TakenBy extends Y,Z,E{
 	if(announced(contains(Annoucement)) take{
 		connect(){
        if(error()) {
