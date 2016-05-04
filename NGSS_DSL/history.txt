@@ -1,0 +1,8 @@
+2016-05-03
+	Clariones:
+		Create Sample.esn.txt draft.
+		This sample includes: layer declaration, import entity and relationship layers, declare entity, declare constraints
+
+2016-05-04
+	Clariones:
+		Add 'Convert" declaration in entity definition

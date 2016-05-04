@@ -172,3 +172,48 @@ FifthEntity {
 	*  没有拆分问题，也没有引入新的信息，可以认为f(a,b,c)解不开，就写了一个 f(a,b,c)=g(a,b,c)一样。等我过两天把关系定义的语法整理出来再看。
 	*/
 }
+
+/**
+ * 这个例子是关于构造函数的。 即 Convert（或者叫 createFrom）行为。
+ * 对应代码，就是一些类似构造函数的东西。 或者一些 Utils 工具方法的东西。具体的实现策略待定。
+ * 这里仅表明实体之间存在着‘可以转化’，‘一生二，二生三’这样的关系
+ */
+SixthEntity {
+	displayedAs	"Example Order","简易订单"
+	MustContainsOne Customer
+	MustContainsOne Service
+	MustContainsOne Barber
+	MustContainsOne Price
+	MustContainsOne CreateTime
+	
+	/* 假设这个订单很简单，客户要求一个服务，指定一个理发师，建立时不需要算价*/
+	// 关键字createFrom 表明这个关系是 Convert 操作触发的
+	createFrom Customer,Service,Barber {	
+		connect CreateTime, $now
+		/* 根据类型推导，可以决定大部分参数直接 connect 即可。额外需要定义的是CreateTime，赋值为当前时间.
+		 * connect 是关键字，表示基本行为之一
+		 */
+	}
+	
+	/*假设这个订单还可以从线下获得，做个转化即可,那么可以说 OfflineOrder Convert to SixthEntity， 或者反过来说 S createFrom O*/
+	createFrom OfflineOrder {
+		connect Customer,OfflineOrder.Customer	// 和Java类似，this.Customer 可以不写 this.
+		connect Service,OfflineOrder.Service
+		connect Barber,OfflineOrder.Barber
+		connect CreateTime, $now
+		/* 这个例子是简单的1对1翻译，如果很直观的可以根据类型找到对应关系，那么除了CreateTime，其他的connect可以不写
+		*/
+	}
+	
+	/*假设存在某个‘任务匹配机器人’，它会负责挑选客户的‘期望’和理发师的‘能力’，那么可以说一个订单 createFrom CustomerWants，BarberCanDo
+	* 假设CustomerWants和BarberCanDo都有 Service，那么就不能简单的根据类型推断出订单里应该记录哪个service。
+	* 我们假定业务规则如下：任务匹配机器人 会先找Service完全匹配的，找不到了再找最接近的，这个‘接近’是可接受的，例如客户发布的是‘平头’，
+	* 但是只有提供‘碎平头’的师傅，而且客户的其他信息表明他可以接受‘调剂’，那么，订单中的Service就应该是Barber实际提供的Service
+	*/
+	createFrom CustomerWants,BarberCanDo {
+		connect Customer,CustomerWants.Customer
+		connect Service,BarberCanDo.Service
+		connect Barber,BarberCanDo.Barber
+		connect CreateTime, $now
+	}
+}
