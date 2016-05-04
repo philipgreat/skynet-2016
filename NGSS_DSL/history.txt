@@ -6,3 +6,7 @@
 2016-05-04
 	Clariones:
 		Add 'Convert" declaration in entity definition
+		Add relationship definition draft
+		Add questions about Philip's new draft
+	Philip:
+		Add new relationship definition draft
