@@ -1,110 +1,110 @@
-// ע�Ͳ���Java��ʽ��ע��
-// ˫б�ߵĵ���ע��
-// /*...*/�Ķ���ע��
+// 注释采用Java格式的注释
+// 双斜线的单行注释
+// /*...*/的多行注释
 
-// ��һ����Ч�У�������layer�� layer�����ֿ����е㡣
-// ����ֿ���ÿ�����ֱ�����һ����Ч�ı�ʶ������ʶ���Ĺ����java��ͬ�����ǲ�����ʹ��$. $���ڱ�����ʶ����
+// 第一个有效行，必须是layer。 layer的名字可以有点。
+// 被点分开的每个部分必须是一个有效的标识符。标识符的规则和java相同，但是不可以使用$. $用于保留标识符。
 layer this.is.a.sample.layer
 
-// ��������ʵ�壬������import���Ĳ㡣 
+// 可以引用实体，方法是import它的层。 
 import some.entity.layer
-// ��������������ϵ�������� use ���Ĳ�
+// 可以引用其他关系，方法是 use 它的层
 use some.relationship.layer
 
 /**
- * ��ϵ��������ݰ���2���ࣺ���� �� ��Ϊ
- * ������Ŀ���Ǹ���Ȼ��������ϵ�Ķ�����������Ϊ�ǹ�ϵ�ı����� �͹�ϵ�йص������У�
- * 	1 - ��Ҫ������ϵ�Ķ�����ʲô����
- *  2 - ��Ҫ�Ͽ���ϵ�Ķ�����ʲô����
- *  3 - ��ϵ�Ƿ�����״̬��ʲô���֡����确�ѻ飬δ�顯
- *  4 - ��ϵ�Ѿ�����Ȼ��Ͽ��˵�״̬��ʲô���֡� ���确��顯
- * ��Ϊ����������
- *  1 - �����ͶϿ�����Ϊ��
- *  2 - ������������Ϊ��
- * ��ϵ�߱���ɫ��ȱʡ�Ľ�ɫ���� $from, $to. 
- * ��������������Ϊ��������Ҫ˵�����ĸ���ɫ�ġ�������ʦ��ѧ���Ĺ�ϵ����ʦ�С���ͽ����ѧ���С���ʦ������ʵ���ǡ�ѧϰ����ϵ�Ĳ�ͬ�Ƕȱ�����ѡ�
+ * 关系定义的内容包含2大类：命名 和 行为
+ * 命名的目的是更自然的描述关系的动作。可以认为是关系的别名。 和关系有关的名字有：
+ * 	1 - 想要建立关系的动作叫什么名字
+ *  2 - 想要断开关系的动作叫什么名字
+ *  3 - 关系是否建立的状态叫什么名字。例如‘已婚，未婚’
+ *  4 - 关系已经建立然后断开了的状态叫什么名字。 例如‘离婚’
+ * 行为包括两大类
+ *  1 - 建立和断开的行为。
+ *  2 - 辅助的其他行为。
+ * 关系具备角色。缺省的角色叫做 $from, $to. 
+ * 无论命名还是行为，都是需要说明是哪个角色的。例如老师和学生的关系，老师叫‘授徒’，学生叫‘拜师’。其实都是‘学习’关系的不同角度表达而已。
  */
-SampleRelationship {
+relation SampleRelationship {//前面价格relation关键字,便于解析
 	/** 
-	 * �����ǽ�ɫ�嵥�� ��ɫ����ָ��һЩ�����������������Щ��������ô��ʾ��ɫ������Ҫ��Ҳ���ǹ�ϵ������.
-	 * $roles �� $naming �ǹؼ��֣���$��ͷ
+	 * 首先是角色清单。 角色可以指定一些条件，如果不满足这些条件，那么表示角色不满足要求，也就是关系不成立.
+	 * $roles 和 $naming 是关键字，以$开头
 	 */
-	$roles ��{
-		teacher if (true)			// �κ�ʵ�嶼��������������ΪSampleRelationship��teacher��ɫ
-		many students				// �κ�ʵ�嶼������Ϊstudent��ɫ�����������ɫ��1�Զ�ġ��࡯�� if (true) ����ʡ�Բ�д
-		/* many �ǹؼ��֡�
-		 * һ����ɫ��������ʽ�� [multiple] <role name> [if (condition)]
-		 * multiple �Ĺؼ��ֿ����� many/a. a ��ѡ��ȱʡ��a����ʾ����ϵ��
-		 *   ��Ϊ�����ж����ɫ������$multiplies���Բ�����ֱ�ӱ�ע�ڹ�ϵ�ϣ���Ҫ��ע�ڽ�ɫ��
-		 * role name ��������Ч�ı�ʶ���� ����Сд��ͷ
-		 * condition ����������ʽ����ʽ������������ʽ��һ��
-		classroom if (classroom contains Address)	// �ڽ�ѧ��ϵ�У�����Ҫһ���ڿεص㣬�κξ߱� Address ��ʵ�嶼������Ϊ classroom
+	$roles ：{
+		teacher if (true)			// 任何实体都可以无条件的作为SampleRelationship的teacher角色
+		many students				// 任何实体都可以作为student角色，而且这个角色是1对多的‘多’。 if (true) 可以省略不写
+		/* many 是关键字。
+		 * 一个角色的描述格式是 [multiple] <role name> [if (condition)]
+		 * multiple 的关键字可以是 many/a. a 可选，缺省是a，表示单关系。
+		 *   因为可能有多个角色，所以$multiplies属性不能再直接标注在关系上，需要标注在角色上
+		 * role name 是任意有效的标识符。 建议小写开头
+		 * condition 是条件表达式。格式见《条件表达式》一文
+		classroom if (classroom contains Address)	// 在教学关系中，还需要一个授课地点，任何具备 Address 的实体都可以作为 classroom
 	}
 	
 	/** 
-	 * Ȼ�����������������ֺͽ�ɫ���������������ͷ�����
+	 * 然后是命名。有了名字和角色，后面描述起来就方便了
 	$naming : {
 		try_to_connect: {
 			teacher: teach
 			students: learn
 			classroom: run
-			/** �������Ѻû����������ѣ���ֱ��ʹ�ù�ϵ�����ǵȼ۵ġ� ����
+			/** 名字是友好化的描述而已，和直接使用关系名字是等价的。 例如
 			 * 	Mentor teach Employee,TrainingRoom
 			 * 	Employee learn Mentor,TriningRoom
 			 * 	TriningRoom run Mentor,Employee
-			 *   ��
+			 *   和
 			 *     connect (Mentor, Employee, TriningRoom) SampleRelationship
-			 *  ��һ����˼
+			 *  是一个意思
 			 */
 		}
 		try_to_disconnect: {
 			teacher: finish
 			students: gradute
-			// û��classroom��������˵�������ϵ������classroom�����Ͽ���ֻ����ʦ����ѧ�������˺󣬵ص㱻���ͷ�
+			// 没有classroom的命名，说明这个关系不能由classroom主动断开。只有老师或者学生结束了后，地点被动释放
 		}
-		connect_success : running	// ��ϵ��״̬�����������ϵ�ģ����Բ���Ҫ����ɫ����
+		connect_success : running	// 关系的状态是针对整个关系的，所以不需要按角色命名
 		connect_fail : cancelled
 		disconnect_success: graduated
 		disconnect_fail: stayDown
 	}
 	
 	/** 
-	 * ���ֺͽ�ɫ������������水�ս�ɫ�������Ե���Ϊ��
-	 * ��ʽΪ ��
-	 *   ��ɫ1 : {��ɫ1��������Ϊ}
-	 *   ��ɫ2 : {��ɫ2��������Ϊ}
-	 *   ... û�б�Ҫ��Ϊ�Ľ�ɫ������Ҫд������ֻ�л�����CRUD����������Ҫ�ر�˵���ģ��Ϳ��Բ���д
+	 * 名字和角色描述清楚后，下面按照角色描述各自的行为。
+	 * 形式为 ：
+	 *   角色1 : {角色1的所有行为}
+	 *   角色2 : {角色2的所有行为}
+	 *   ... 没有必要行为的角色，不需要写。例如只有基本的CRUD操作，不需要特别说明的，就可以不用写
 	 */
 	teacher : {
-		/** ÿ����Ϊ��������ʽΪ��if(condition) <��Ϊ��> = {��Ϊ��}
-		 * if (true) ���Ժ���
+		/** 每个行为的描述格式为：if(condition) <行为名> = {行为体}
+		 * if (true) 可以忽略
 		if (true) teach = {
-			/** �κ�һ����ϵ�� connect/disconnect ��Ϊ�Ĳ����������н�ɫ�����Բ���Ҫ��ȷ���� 
+			/** 任何一个关系的 connect/disconnect 行为的参数都是所有角色，所以不需要明确参数 
 			 */
 			 
 			connect student.Mentor, teacher	
-			/** student �ǽ�ɫ����Mentor ����������teacher �ǽ�ɫ��
-			 *  ����������һ�����ͣ�ʵ�壩Mentor�� ϵͳ����ȷ�����ĸ�Layer��Teacher��
-			 *  ǰ���� import some.entity.layer�� �������Teacher��������������ң��ٵ�ϵͳȱʡ�㡣�����ҵ�Ϊֹ����Ȼ����
-			 *  ͨ������£�����Ҫ��ʽ��ָ����������ʵ�������������޶������ϵ��Ӧ�á�
-			 *  �����һ����ʵ��������� $entity(). ����ģ�
+			/** student 是角色名，Mentor 是类型名，teacher 是角色名
+			 *  这里引用了一个类型（实体）Mentor。 系统必须确定是哪个Layer的Teacher。
+			 *  前面有 import some.entity.layer， 所以这个Teacher会首先在这个层找，再到系统缺省层。。。找到为止，不然报错
+			 *  通常情况下，不需要显式的指明类型名（实体名）这样会限定这个关系的应用。
+			 *  因此有一个‘实体操作符’ $entity(). 下面的：
 			 */
 			connect teacher.$entity(student), student
-			/** �ȼ��� connect teacher.Employee, student, in this case */
+			/** 等价于 connect teacher.Employee, student, in this case */
 			
 			if ((teacher contains Lesson) && (student contains Lesson)) {
 			/**
-			 * �������ʹ�õ���contains Lesson���������жϹ�ϵ�Ƿ񱻶��壬�������һ��������������
-			 * ����������teacher��student��������ɫ�����еĹ�ϵ��������κ�һ�������㣬������δ��붼��������ڲ�Ʒ��
+			 * 这个条件使用的是contains Lesson，表明是判断关系是否被定义，因此它是一个‘类型条件’
+			 * 编译器分析teacher和student这两个角色所具有的关系，如果有任何一个不满足，下面这段代码都不会出现在产品中
 			 */
-				Lesson createFrom teacher,student	// ������ʦ���Խ��ڵĿγ̣���ѧ��Ҫѧ�Ŀγ̣�createһ��ĿǰҪ�ϵĿγ�
+				Lesson createFrom teacher,student	// 根据老师可以教授的课程，和学生要学的课程，create一个目前要上的课程
 				if (empty(Lesson)){
 				/**
-				 * empty ����������ʱ�����������ж�Lesson����Ƿ�����Чֵ��Ϊ�գ�Ϊnull�������ж�Ϊempty
-				 * ����ʱ��������ζ�ţ������֧���������ڲ�Ʒ��
+				 * empty 条件是运行时条件，它会判断Lesson结果是否有有效值，为空，为null，都会判定为empty
+				 * 运行时条件还意味着，这个分支代码会出现在产品里
 				 */
 					ErrLog createFrom teacher.Lesson,student.Lesson
-					return cancelled	// �����������ǰ�涨��ġ�connect_fail : cancelled��. xxx_fail�����ֽ��ᵼ�����ɵĴ������������ع��Ĳ���
+					return cancelled	// 这个名字是在前面定义的“connect_fail : cancelled”. xxx_fail的名字将会导致生成的代码里包含事务回滚的操作
 				}
 				connect teacher.Lesson, Lesson
 				connect student.Lesson, Lesson
